@@ -1,0 +1,144 @@
+[
+  {
+    "scenario": "s1_aggregate",
+    "tag": "pg17",
+    "server_version": "17.9 (Debian 17.9-1.pgdg13+1)",
+    "io_method": "n/a (PG17)",
+    "shared_buffers": "256MB",
+    "median_ms": 4322.11,
+    "label": "待たされる",
+    "runs": [
+      4611.32,
+      4354.496,
+      4229.02,
+      4322.112,
+      4188.73
+    ],
+    "plan": {
+      "top_node": "Aggregate",
+      "node_types": [
+        "Aggregate",
+        "Gather Merge",
+        "Aggregate",
+        "Sort",
+        "Seq Scan"
+      ],
+      "uses_seq_scan": true,
+      "uses_index": false
+    }
+  },
+  {
+    "scenario": "s2_skipscan",
+    "tag": "pg17",
+    "server_version": "17.9 (Debian 17.9-1.pgdg13+1)",
+    "io_method": "n/a (PG17)",
+    "shared_buffers": "256MB",
+    "median_ms": 847.01,
+    "label": "わずかな待ち",
+    "runs": [
+      847.013,
+      792.23,
+      830.36,
+      858.685,
+      885.819
+    ],
+    "plan": {
+      "top_node": "Aggregate",
+      "node_types": [
+        "Aggregate",
+        "Gather",
+        "Aggregate",
+        "Seq Scan"
+      ],
+      "uses_seq_scan": true,
+      "uses_index": false
+    }
+  },
+  {
+    "scenario": "s4_deepjoin",
+    "tag": "pg17",
+    "server_version": "17.9 (Debian 17.9-1.pgdg13+1)",
+    "io_method": "n/a (PG17)",
+    "shared_buffers": "256MB",
+    "median_ms": 1701.66,
+    "label": "待たされる",
+    "runs": [
+      1959.455,
+      1683.153,
+      1701.659,
+      1677.587,
+      1711.701
+    ],
+    "plan": {
+      "top_node": "Sort",
+      "node_types": [
+        "Sort",
+        "Aggregate",
+        "Gather Merge",
+        "Sort",
+        "Aggregate",
+        "Hash Join",
+        "Seq Scan",
+        "Hash",
+        "Hash Join",
+        "Hash Join",
+        "Seq Scan",
+        "Hash",
+        "Seq Scan",
+        "Hash",
+        "Seq Scan"
+      ],
+      "uses_seq_scan": true,
+      "uses_index": false
+    }
+  },
+  {
+    "scenario": "auth_lookup",
+    "tag": "pg17",
+    "server_version": "17.9 (Debian 17.9-1.pgdg13+1)",
+    "io_method": "n/a (PG17)",
+    "shared_buffers": "256MB",
+    "median_ms": 0.01,
+    "label": "一瞬",
+    "runs": [
+      0.273,
+      0.009,
+      0.008,
+      0.007,
+      0.007
+    ],
+    "plan": {
+      "top_node": "Index Scan",
+      "node_types": [
+        "Index Scan"
+      ],
+      "uses_seq_scan": false,
+      "uses_index": true
+    }
+  },
+  {
+    "scenario": "cms_fuzzy",
+    "tag": "pg17",
+    "server_version": "17.9 (Debian 17.9-1.pgdg13+1)",
+    "io_method": "n/a (PG17)",
+    "shared_buffers": "256MB",
+    "median_ms": 8.18,
+    "label": "一瞬",
+    "runs": [
+      8.98,
+      8.176,
+      7.549,
+      8.252,
+      5.669
+    ],
+    "plan": {
+      "top_node": "Limit",
+      "node_types": [
+        "Limit",
+        "Seq Scan"
+      ],
+      "uses_seq_scan": true,
+      "uses_index": false
+    }
+  }
+]

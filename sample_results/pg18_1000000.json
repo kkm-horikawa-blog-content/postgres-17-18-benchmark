@@ -1,0 +1,140 @@
+[
+  {
+    "scenario": "s1_aggregate",
+    "tag": "pg18",
+    "server_version": "18.4 (Debian 18.4-1.pgdg13+1)",
+    "io_method": "worker",
+    "shared_buffers": "256MB",
+    "median_ms": 302.33,
+    "label": "わずかな待ち",
+    "runs": [
+      400.435,
+      277.618,
+      290.438,
+      314.439,
+      302.328
+    ],
+    "plan": {
+      "top_node": "Aggregate",
+      "node_types": [
+        "Aggregate",
+        "Sort",
+        "Seq Scan"
+      ],
+      "uses_seq_scan": true,
+      "uses_index": false
+    }
+  },
+  {
+    "scenario": "s2_skipscan",
+    "tag": "pg18",
+    "server_version": "18.4 (Debian 18.4-1.pgdg13+1)",
+    "io_method": "worker",
+    "shared_buffers": "256MB",
+    "median_ms": 5.62,
+    "label": "一瞬",
+    "runs": [
+      25.036,
+      6.777,
+      4.907,
+      4.439,
+      5.625
+    ],
+    "plan": {
+      "top_node": "Aggregate",
+      "node_types": [
+        "Aggregate",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan"
+      ],
+      "uses_seq_scan": false,
+      "uses_index": true
+    }
+  },
+  {
+    "scenario": "s4_deepjoin",
+    "tag": "pg18",
+    "server_version": "18.4 (Debian 18.4-1.pgdg13+1)",
+    "io_method": "worker",
+    "shared_buffers": "256MB",
+    "median_ms": 57.14,
+    "label": "一瞬",
+    "runs": [
+      62.632,
+      57.14,
+      57.568,
+      55.108,
+      56.05
+    ],
+    "plan": {
+      "top_node": "Sort",
+      "node_types": [
+        "Sort",
+        "Aggregate",
+        "Gather Merge",
+        "Sort",
+        "Aggregate",
+        "Hash Join",
+        "Seq Scan",
+        "Hash",
+        "Nested Loop",
+        "Hash Join",
+        "Seq Scan",
+        "Hash",
+        "Seq Scan",
+        "Index Only Scan"
+      ],
+      "uses_seq_scan": true,
+      "uses_index": true
+    }
+  },
+  {
+    "scenario": "auth_lookup",
+    "tag": "pg18",
+    "server_version": "18.4 (Debian 18.4-1.pgdg13+1)",
+    "io_method": "worker",
+    "shared_buffers": "256MB",
+    "median_ms": 0.0,
+    "label": "一瞬",
+    "runs": [
+      0.646,
+      0.006,
+      0.004,
+      0.003,
+      0.003
+    ],
+    "plan": {
+      "top_node": "Index Scan",
+      "node_types": [
+        "Index Scan"
+      ],
+      "uses_seq_scan": false,
+      "uses_index": true
+    }
+  },
+  {
+    "scenario": "cms_fuzzy",
+    "tag": "pg18",
+    "server_version": "18.4 (Debian 18.4-1.pgdg13+1)",
+    "io_method": "worker",
+    "shared_buffers": "256MB",
+    "median_ms": 4.71,
+    "label": "一瞬",
+    "runs": [
+      4.984,
+      4.715,
+      5.044,
+      4.663,
+      4.448
+    ],
+    "plan": {
+      "top_node": "Limit",
+      "node_types": [
+        "Limit",
+        "Seq Scan"
+      ],
+      "uses_seq_scan": true,
+      "uses_index": false
+    }
+  }
+]
