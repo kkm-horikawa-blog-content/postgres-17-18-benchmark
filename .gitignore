@@ -3,3 +3,6 @@ __pycache__/
 results/*.json
 charts/output/*.png
 .DS_Store
+.venv/
+*.log
+dumps/

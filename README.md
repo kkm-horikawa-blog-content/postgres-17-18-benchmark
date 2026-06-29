@@ -68,3 +68,33 @@ MIT
 要点: 大規模集計は PG18 がむしろ遅く（io_method 既定 worker で 4.3s→7.1s）、
 複合索引の絞り込み（スキップスキャン）は速くなりました（847ms→585ms）。
 詳細は記事を参照してください。
+
+## 追加検証スクリプト（記事の深掘り）
+
+「大きな集計が18で遅くなった」の原因を追う過程で足した、より細かく計測するためのスクリプト群です。`make up schema load index` でデータを入れた状態で使います（Python依存は `make deps`、または `python -m venv .venv && .venv/bin/pip install psycopg[binary] faker matplotlib`）。
+
+| スクリプト | 何をするか |
+|---|---|
+| `bench/probe.py` | s1/s4/s2 を `EXPLAIN (ANALYZE, BUFFERS, SETTINGS)` で計測し、実行時間・I/O待ち・shared hit/read・並列ワーカー数を1行で出す。`--set "key=val"` で任意GUCを適用 |
+| `cold.sh <port> <label>` | OSページキャッシュを drop して cold（ディスクから読む）状態で計測 |
+| `diskbound.sh <port> <label>` | メモリ上限でキャッシュを絞り、テーブル>キャッシュのディスク律速で計測 |
+| `write_bench.sh <port> <label> [N]` | INSERT/UPDATE/DELETE/VACUUM の書き込み計測（チェックサムの影響確認） |
+| `run_conc.sh <label> <接続数...>` ＋ `bench_user.sql` | pgbench で同時接続スループット(TPS)を測る |
+| `throttle.sh <riops\|0>` | cgroup で read IOPS を絞り「遅いディスク」を再現（`0` で解除） |
+| `grow_pg18.sh` | events を Faker無しの `INSERT...SELECT` 倍々で >RAM まで増やす |
+| `override-iouring.yml` | `io_method=io_uring` を試すとき seccomp を外す compose override |
+| `charts/blog_figures.py` | 記事の図（集計の回復・I/O待ちvs実時間・同時接続TPS）を再生成 |
+
+```bash
+make probe Q=s1_aggregate          # 大きな集計の実行計画と時間
+make probe Q=s4_deepjoin
+bash cold.sh 5418 PG18             # cold（ディスク読み）で計測
+bash write_bench.sh 5418 PG18     # 書き込み
+bash run_conc.sh PG18 1 16 64     # 同時接続スループット
+```
+
+### 分かったこと（要点）
+
+- **「大きな集計が18で遅い」の真因は非同期I/Oではなく、プランナが並列をやめて直列化したこと。** 式での `GROUP BY`（`date_trunc('month', …)`）がグループ数の見積りを大きく外し、並列が割高に見えるため。`max_parallel_workers_per_gather` を上げるか、`CREATE STATISTICS`（拡張統計。**17でも有効**）で見積りを直すと回復する。
+- **非同期I/O(AIO)は I/O待ちを大きく減らすが、速いNVMeでは実時間の得は小さい。** さらに同時接続が多いと優位は消え、既定の `io_method=worker` がむしろ最も遅いことがある（`sync`/`io_uring` と要比較、`io_workers` は絞りすぎない）。
+- **書き込みは17/18でほぼ互角。** 18でデータチェックサムが既定オンでも体感差はない。

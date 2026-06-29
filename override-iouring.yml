@@ -1,0 +1,7 @@
+# io_uring を試すとき用: seccomp を外して io_uring システムコールを許可する
+# 使い方:
+#   IO_METHOD=io_uring docker compose -f docker-compose.yml -f override-iouring.yml up -d --force-recreate pg18
+services:
+  pg18:
+    security_opt:
+      - seccomp=unconfined

@@ -55,4 +55,18 @@ chart:
 deps:
 	pip install -r loader/requirements.txt
 
-.PHONY: up down restart-pg18 schema load load-cms index bench chart deps
+# ---- 追加検証（記事の深掘り。詳細は README「追加検証スクリプト」） ----
+# 例: make probe Q=s1_aggregate / make probe Q=s4_deepjoin
+probe:
+	$(PY) bench/probe.py --dsn "$(PG18_DSN)" --query $(Q)
+
+write-bench:
+	bash write_bench.sh 5417 PG17 && bash write_bench.sh 5418 PG18
+
+conc-bench:
+	bash run_conc.sh PG18 1 16 32 64
+
+blog-figures:
+	$(PY) charts/blog_figures.py
+
+.PHONY: up down restart-pg18 schema load load-cms index bench chart deps probe write-bench conc-bench blog-figures
