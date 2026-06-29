@@ -1,0 +1,53 @@
+# =====================================================================
+#  PostgreSQL 17.9 と 18 を並走させるベンチ環境
+#  - shared_buffers は小さめ（256MB）に固定。
+#    データを RAM に載りきらせず「ディスクから読む」状況を作ることで、
+#    非同期I/O(io_method) の効果が体感レベルで出るようにしている。
+#  - io_method は環境変数 IO_METHOD で切替（worker / sync / io_uring）。
+#    PG18 の効果を分離して測るときに使う。
+# =====================================================================
+services:
+  pg17:
+    image: postgres:17.9
+    environment:
+      POSTGRES_USER: bench
+      POSTGRES_PASSWORD: bench
+      POSTGRES_DB: bench
+    ports: ["5417:5432"]
+    volumes: ["pg17data:/var/lib/postgresql/data"]
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - track_io_timing=on
+      - -c
+      - max_parallel_workers_per_gather=2
+      - -c
+      - effective_cache_size=1GB
+
+  pg18:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: bench
+      POSTGRES_PASSWORD: bench
+      POSTGRES_DB: bench
+    ports: ["5418:5432"]
+    # PG18 の公式イメージはマウント点が /var/lib/postgresql に変わった点に注意
+    volumes: ["pg18data:/var/lib/postgresql"]
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - track_io_timing=on
+      - -c
+      - max_parallel_workers_per_gather=2
+      - -c
+      - effective_cache_size=1GB
+      - -c
+      - io_method=${IO_METHOD:-worker}
+
+volumes:
+  pg17data:
+  pg18data:
